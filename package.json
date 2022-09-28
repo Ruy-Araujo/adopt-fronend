@@ -13,8 +13,13 @@
     "build": "node build/build.js"
   },
   "dependencies": {
+    "@vue/cli-plugin-babel": "4.1.1",
+    "axios": "^0.27.2",
+    "bootstrap-vue": "^2.22.0",
     "vue": "^2.5.2",
-    "vue-router": "^3.0.1"
+    "vue-api-query": "^1.9.1",
+    "vue-router": "^3.5.1",
+    "vuelidate": "^0.7.7"
   },
   "devDependencies": {
     "autoprefixer": "^7.1.2",
