@@ -60,6 +60,8 @@ import axios from "axios";
 export default {
   name: "Vitrine",
 
+  // TODO: Implementar validação de se está logado ver botões que apenas admin podem ver
+
   mixins: [LocalStorageMixin, ToastMixin],
 
   data() {
@@ -76,7 +78,7 @@ export default {
       let response = await axios.get("https://adoptapp.azurewebsites.net/pets");
       this.animais = response.data;
     } catch (err) {
-      this.showToast("danger", "Erro!", err.message);
+      this.showToast("danger", "Erro!", err.response.data.detail.message);
     }
   },
   methods: {
@@ -104,20 +106,28 @@ export default {
             Authorization: "Bearer " + estaAutenticado
           }
         };
-        await axios
-          .delete(
+        try {
+          await axios.delete(
             "https://adoptapp.azurewebsites.net/pet/" +
               this.animalSelecionado.id,
             headers
-          )
-          .then(res => console.log(res))
-          .catch(err => console.log(err));
+          );
+          this.showToast("success", "Sucesso!", "Animal deletado com sucesso!");
 
-        await axios
-          .get("https://adoptapp.azurewebsites.net/pets")
-          .then(res => (this.animais = res.data))
-          .catch(err => console.log(err));
-        console.log(this.animais);
+          let response = await axios.get(
+            "https://adoptapp.azurewebsites.net/pets"
+          );
+          this.animais = response.data;
+        } catch (err) {
+          this.showToast("danger", "Erro!", err.response.data.detail.message);
+        }
+      } else {
+        this.showToast(
+          "danger",
+          "Error!",
+          "Você não está autenticado, faça login novamente!"
+        );
+        this.$router.push({ name: "Login" });
       }
 
       this.esconderModal();

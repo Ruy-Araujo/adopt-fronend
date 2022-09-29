@@ -183,6 +183,7 @@ export default {
       // TODO: Remover adotado dps q Ruy remover backend
       this.form.adotado = false;
       let estaAutenticado = this.getLocalStorage("Adopt_at");
+
       if (estaAutenticado) {
         let headers = {
           "Access-Control-Allow-Origin": "*",
@@ -208,6 +209,7 @@ export default {
             "Sucesso!",
             "Animal atualizado com sucesso!"
           );
+          this.$router.push({ name: "Vitrine" });
         } else if (this.methodSave === "new") {
           await axios
             .post(
@@ -219,32 +221,23 @@ export default {
             .catch(error => console.log("e", error));
 
           this.showToast("success", "Sucesso!", "Animal criado com sucesso!");
+          this.$router.push({ name: "Vitrine" });
         }
       } else {
+        this.showToast(
+          "danger",
+          "Error!",
+          "Você não está autenticado, faça login novamente!"
+        );
         this.$router.push({ name: "Login" });
       }
-
-      this.$router.push({ name: "Vitrine" });
     }
   },
   created() {
-    // this.setLocalStorage(
-    //   "Adopt_at",
-    //   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySUQiOiJjYUBlbWFpbC5jb20iLCJleHBpcnkiOjE2NjQ0MDg5NjcuNTE5NDMxOH0.nWa3GWPgtYAiyY7XGbxRE3p1bi9W8WapKYhoFLP8X4E",
-    //   60
-    // );
-    // this.getLocalStorage("Adopt_at");
-    // console.log(this.getLocalStorage("Adopt_at"));
-    // TODO: Implementar nas telas que precisam de autenticação
-    // let estaAutenticado = this.getLocalStorage("Adopt_at");
-    // if (estaAutenticado) {
-    //   this.$router.push({ name: "Login" });
-    // }
-
     if (this.$route.params.index) {
       this.methodSave = "update";
 
-      // TODO: Funciona, mas precisa ver a logica do back pq ta quebrando, ver com Ruy
+      // TODO: Mudar para outro padrão
       axios
         .get(
           "https://adoptapp.azurewebsites.net/pet/" + this.$route.params.index

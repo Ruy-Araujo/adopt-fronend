@@ -79,11 +79,13 @@
 </template>
 
 <script>
+import ToastMixin from "@/mixins/toastMixin.js";
 import { required, minLength, email } from "vuelidate/lib/validators";
 import axios from "axios";
 
 export default {
   name: "Cadastro",
+  mixins: [ToastMixin],
   data() {
     return {
       form: {
@@ -157,7 +159,7 @@ export default {
         );
         this.$router.push({ name: "Login" });
       } catch (err) {
-        this.showToast("danger", "Erro!", err.message);
+        this.showToast("danger", "Erro!", err.response.data.detail.message);
       }
     }
   }
