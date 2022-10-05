@@ -74,7 +74,7 @@
           id="observacoes"
           v-model.trim="observacoes.$model"
           type="text"
-          placeholder="Ex: Pastor alemão"
+          placeholder="Observações do animal"
           autocomplete="off"
           required
           :state="this.validaCampo(observacoes)"
