@@ -3,16 +3,18 @@
 </template>
 
 <script>
-import LocalStorageMixin from "@/mixins/localStorageMixin.js";
+import AutenticacaoMixin from "@/mixins/autenticacaoMixin.vue";
 import ToastMixin from "@/mixins/toastMixin.js";
 
 export default {
   name: "Deslogar",
 
-  mixins: [LocalStorageMixin, ToastMixin],
+  mixins: [AutenticacaoMixin, ToastMixin],
 
   created() {
-    this.setLocalStorage("Adopt_at", "", 0);
+    this.defineToken("", 0);
+    setTimeout(function() {}, 3000);
+    this.$emit("autenticacao", this.obtemToken());
     this.$router.push({ name: "Login" });
     this.showToast("success", "Sucesso!", "Você foi deslogado com sucesso!");
   }

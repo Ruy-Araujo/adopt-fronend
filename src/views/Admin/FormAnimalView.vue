@@ -1,12 +1,17 @@
 <template>
   <div class="container mt-2">
+    <h2>Preencha as informações do animal que será colocado para adoção.</h2>
+
+    <br />
+    <br />
+
     <b-form>
       <b-form-group label="Nome" laber-for="nomeAnimal">
         <b-form-input
           id="nomeAnimal"
           v-model.trim="nome.$model"
           type="text"
-          placeholder="Ex: Rex"
+          placeholder="Rex"
           autocomplete="off"
           required
           :state="this.validaCampo(nome)"
@@ -24,7 +29,7 @@
           id="idade"
           v-model="idade.$model"
           type="number"
-          placeholder="Ex: 1"
+          placeholder="2"
           autocomplete="off"
           required
           :state="this.validaCampo(idade)"
@@ -37,7 +42,7 @@
           id="especie"
           v-model.trim="especie.$model"
           type="text"
-          placeholder="Ex: Pastor alemão"
+          placeholder="Cachorro"
           autocomplete="off"
           required
           :state="this.validaCampo(especie)"
@@ -50,7 +55,7 @@
           id="raca"
           v-model.trim="raca.$model"
           type="text"
-          placeholder="Ex: Pastor alemão"
+          placeholder="Pug"
           autocomplete="off"
           required
           :state="this.validaCampo(raca)"
@@ -58,14 +63,10 @@
       </b-form-group>
 
       <b-form-group label="Sexo" laber-for="sexo">
-        <b-form-input
-          id="sexo"
-          v-model.trim="sexo.$model"
-          type="text"
-          autocomplete="off"
-          required
-          :state="this.validaCampo(sexo)"
-        ></b-form-input>
+        <b-form-select
+          v-model="sexo.$model"
+          :options="optionsSexo"
+        ></b-form-select>
       </b-form-group>
 
       <b-form-group label="Observações" laber-for="observacoes">
@@ -77,8 +78,20 @@
           autocomplete="off"
           required
           :state="this.validaCampo(observacoes)"
-          aria-describedby="especieFeedback"
         ></b-form-input>
+      </b-form-group>
+
+      <b-form-group label="Foto" laber-for="foto">
+        <b-form-file
+          id="foto"
+          v-model="foto.$model"
+          placeholder="Adicione uma foto do animal."
+          required
+          :state="Boolean(form.foto)"
+        ></b-form-file>
+        <div class="mt-3" v-if="form.foto">
+          Selected file: {{ form.foto.name }}
+        </div>
       </b-form-group>
 
       <b-button
@@ -94,14 +107,14 @@
 
 <script>
 import ToastMixin from "@/mixins/toastMixin.js";
-import LocalStorageMixin from "@/mixins/localStorageMixin.js";
+import AutenticacaoMixin from "@/mixins/autenticacaoMixin.vue";
 import { required, minLength } from "vuelidate/lib/validators";
 import axios from "axios";
 
 export default {
   name: "FormAnimal",
 
-  mixins: [ToastMixin, LocalStorageMixin],
+  mixins: [ToastMixin, AutenticacaoMixin],
 
   data() {
     return {
@@ -110,8 +123,9 @@ export default {
         idade: null,
         especie: "",
         raca: "",
-        sexo: "",
-        observacoes: ""
+        sexo: null,
+        observacoes: "",
+        foto: null
       },
       methodSave: "new"
     };
@@ -136,6 +150,9 @@ export default {
       },
       observacoes: {
         required
+      },
+      foto: {
+        required
       }
     }
   },
@@ -158,6 +175,9 @@ export default {
     observacoes() {
       return this.$v.form.observacoes;
     },
+    foto() {
+      return this.$v.form.foto;
+    },
     obtemValidador() {
       return (
         this.validaCampo(this.nome) &&
@@ -165,8 +185,20 @@ export default {
         this.validaCampo(this.especie) &&
         this.validaCampo(this.raca) &&
         this.validaCampo(this.sexo) &&
-        this.validaCampo(this.observacoes)
+        this.validaCampo(this.observacoes) &&
+        this.validaCampo(this.foto)
       );
+    },
+    optionsSexo() {
+      let options = [];
+
+      if (!this.form.sexo) {
+        options.push({ value: null, text: "Selecione o sexo do animal" });
+      }
+      options.push({ value: "Macho", text: "Macho" });
+      options.push({ value: "Fêmea", text: "Fêmea" });
+
+      return options;
     }
   },
   methods: {
@@ -178,50 +210,55 @@ export default {
     },
     async salvarAnimal() {
       this.form.idade = +this.form.idade;
-      // TODO: Arrumar todos os placeholders
 
-      // TODO: Remover adotado dps q Ruy remover backend
-      this.form.adotado = false;
-      let estaAutenticado = this.getLocalStorage("Adopt_at");
-
-      if (estaAutenticado) {
+      if (this.obtemToken()) {
         let headers = {
           "Access-Control-Allow-Origin": "*",
           "Access-Control-Allow-Headers": "Authorization",
           headers: {
-            Authorization: "Bearer " + estaAutenticado
+            Authorization: "Bearer " + this.obtemToken()
           }
         };
 
         if (this.methodSave === "update") {
-          await axios
-            .patch(
+          try {
+            await axios.patch(
               "https://adoptapp.azurewebsites.net/pet/" +
                 this.$route.params.index,
               this.form,
               headers
-            )
-            .then(res => console.log(res))
-            .catch(err => console.log(err));
+            );
 
-          this.showToast(
-            "success",
-            "Sucesso!",
-            "Animal atualizado com sucesso!"
-          );
-          this.$router.push({ name: "Vitrine" });
+            this.showToast(
+              "success",
+              "Sucesso!",
+              "Animal atualizado com sucesso!"
+            );
+            this.$router.push({ name: "Vitrine" });
+          } catch (err) {
+            this.showToast("danger", "Erro!", err.response.data.detail.message);
+          }
         } else if (this.methodSave === "new") {
-          await axios
-            .post(
-              "https://adoptapp.azurewebsites.net/pet/register",
-              this.form,
-              headers
-            )
-            .then(response => console.log("r", response))
-            .catch(error => console.log("e", error));
+          const formData = new FormData();
+          formData.append("nome", this.form.nome);
+          formData.append("idade", this.form.idade);
+          formData.append("especie", this.form.especie);
+          formData.append("raca", this.form.raca);
+          formData.append("sexo", this.form.sexo);
+          formData.append("observacoes", this.form.observacoes);
+          formData.append("foto", this.form.foto);
 
-          this.showToast("success", "Sucesso!", "Animal criado com sucesso!");
-          this.$router.push({ name: "Vitrine" });
+          try {
+            await axios.post(
+              "https://adoptapp.azurewebsites.net/pet/register",
+              formData,
+              headers
+            );
+            this.showToast("success", "Sucesso!", "Animal criado com sucesso!");
+            this.$router.push({ name: "Vitrine" });
+          } catch (err) {
+            this.showToast("danger", "Erro!", err.response.data.detail.message);
+          }
         }
       } else {
         this.showToast(
@@ -233,17 +270,22 @@ export default {
       }
     }
   },
-  created() {
+  async created() {
     if (this.$route.params.index) {
       this.methodSave = "update";
 
-      // TODO: Mudar para outro padrão
-      axios
-        .get(
+      // TODO: Validação de File apenas com imagem
+      // TODO: Remover campo de Foto no update
+      try {
+        let animal = await axios.get(
           "https://adoptapp.azurewebsites.net/pet/" + this.$route.params.index
-        )
-        .then(res => (this.form = res.data))
-        .catch(err => console.log(err));
+        );
+        this.form = animal.data.content;
+        console.log(animal.data.content);
+      } catch (err) {
+        this.showToast("danger", "Erro!", err.response.data.detail.message);
+        this.$router.push({ name: "Vitrine" });
+      }
     }
   }
 };

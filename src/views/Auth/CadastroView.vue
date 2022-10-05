@@ -80,12 +80,13 @@
 
 <script>
 import ToastMixin from "@/mixins/toastMixin.js";
+import AutenticacaoMixin from "@/mixins/autenticacaoMixin.vue";
 import { required, minLength, email } from "vuelidate/lib/validators";
 import axios from "axios";
 
 export default {
   name: "Cadastro",
-  mixins: [ToastMixin],
+  mixins: [ToastMixin, AutenticacaoMixin],
   data() {
     return {
       form: {
@@ -146,20 +147,32 @@ export default {
       return !campo.$error;
     },
     async salvarUsuario() {
-      console.log("Salvo!");
-      let headers = {
-        "Access-Control-Allow-Origin": "*"
-      };
+      if (this.obtemToken()) {
+        let headers = {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Headers": "Authorization",
+          headers: {
+            Authorization: "Bearer " + this.obtemToken()
+          }
+        };
 
-      try {
-        await axios.post(
-          "https://adoptapp.azurewebsites.net/user/register",
-          this.form,
-          headers
+        try {
+          await axios.post(
+            "https://adoptapp.azurewebsites.net/user/register",
+            this.form,
+            headers
+          );
+          this.$router.push({ name: "Vitrine" });
+        } catch (err) {
+          this.showToast("danger", "Erro!", err.response.data.detail.message);
+        }
+      } else {
+        this.showToast(
+          "danger",
+          "Error!",
+          "Você não está autenticado, faça login novamente!"
         );
         this.$router.push({ name: "Login" });
-      } catch (err) {
-        this.showToast("danger", "Erro!", err.response.data.detail.message);
       }
     }
   }

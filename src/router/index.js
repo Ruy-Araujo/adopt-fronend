@@ -31,20 +31,22 @@ const routes = [
   }
 ];
 
-export default new VueRouter({
+const router = new VueRouter({
   mode: "history",
   routes
 });
 
-// TODO: Implementar validação de login para rotas que precisam de login
-// router.beforeEach((to, from, next) => {
-//   if (
-//     to.name !== "login" &&
-//     to.name !== "register" &&
-//     !localStorage.getItem("authUser")
-//   ) {
-//     next({ name: "login" });
-//   } else {
-//     next();
-//   }
-// });
+router.beforeEach((to, from, next) => {
+  if (
+    (to.name === "Deslogar" ||
+      to.name === "Cadastro" ||
+      to.name === "FormAnimal") &&
+    !localStorage.getItem("Adopt_at")
+  ) {
+    next({ name: "Login", params: { validation: true } });
+  } else {
+    next();
+  }
+});
+
+export default router;

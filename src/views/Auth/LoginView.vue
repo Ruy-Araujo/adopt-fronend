@@ -32,14 +32,13 @@
 
 <script>
 import ToastMixin from "@/mixins/toastMixin.js";
-import LocalStorageMixin from "@/mixins/localStorageMixin.js";
+import AutenticacaoMixin from "@/mixins/autenticacaoMixin.vue";
 import axios from "axios";
 
 export default {
   name: "Login",
 
-  mixins: [ToastMixin, LocalStorageMixin],
-  // TODO: Usar design prévio para outras páginas se der - (Parcial feito)
+  mixins: [ToastMixin, AutenticacaoMixin],
   data() {
     return {
       form: {
@@ -61,12 +60,9 @@ export default {
           this.form,
           headers
         );
-        this.setLocalStorage(
-          "Adopt_at",
-          response.data.access_token,
-          response.data.expires
-        );
+        this.defineToken(response.data.access_token, response.data.expires);
         this.showToast("success", "Sucesso!", "Você está logado!");
+        this.$emit("autenticacao", this.obtemToken());
 
         this.$router.push({ name: "Vitrine" });
       } catch (err) {
@@ -75,9 +71,10 @@ export default {
     }
   },
   created() {
-    let estaAutenticado = this.getLocalStorage("Adopt_at");
-
-    if (estaAutenticado) {
+    if (this.$route.params.validation) {
+      this.$emit("autenticacao", this.obtemToken());
+    }
+    if (this.obtemToken()) {
       this.$router.push({ name: "Vitrine" });
     }
   }

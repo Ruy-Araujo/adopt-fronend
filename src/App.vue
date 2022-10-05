@@ -12,9 +12,12 @@
 
         <!-- Right aligned nav items -->
         <b-navbar-nav class="ml-auto">
-          <b-nav-item v-if="estaAutenticadoApp" :to="{ name: 'Deslogar' }"
-            >Deslogar</b-nav-item
-          >
+          <div v-if="this.token" class="d-flex row">
+            <b-nav-item class="mr-4" :to="{ name: 'Cadastro' }"
+              >Registre um novo usuário</b-nav-item
+            >
+            <b-nav-item :to="{ name: 'Deslogar' }">Deslogar</b-nav-item>
+          </div>
           <b-nav-item
             v-else
             :to="{ name: 'Login' }"
@@ -25,32 +28,24 @@
       </b-navbar>
     </div>
     <transition name="fade" mode="out-in">
-      <router-view />
+      <router-view @autenticacao="token => (this.token = token)" />
     </transition>
   </div>
 </template>
 
 <script>
 import LocalStorageMixin from "@/mixins/localStorageMixin.js";
-// TODO: Arrumar botão de logar e deslogar
+import AutenticacaoMixin from "@/mixins/autenticacaoMixin.vue";
 
 export default {
   name: "App",
+  mixins: [LocalStorageMixin, AutenticacaoMixin],
   data() {
     return {
-      estaAutenticadoApp: Boolean(this.getLocalStorage("Adopt_at"))
+      token: ""
     };
   },
-
   computed: {
-    getRouteName() {
-      return this.$route.name;
-    }
-  },
-
-  mixins: [LocalStorageMixin],
-
-  method: {
     getRouteName() {
       return this.$route.name;
     }
@@ -58,6 +53,7 @@ export default {
 
   created() {
     this.localStorageExpires();
+    this.token = this.obtemToken();
   }
 };
 </script>
