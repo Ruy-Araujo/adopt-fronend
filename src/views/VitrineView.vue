@@ -48,9 +48,26 @@
             @click="deletar(animal, animal.id)"
             >Excluir
           </b-button>
-          <b-button variant="success">Adotar</b-button>
+          <b-button variant="success" @click="adotar()">Adotar</b-button>
         </b-card>
       </div>
+
+      <b-modal ref="modalAdotar" hide-footer title="Preencha seus dados">
+        <iframe
+          width="640px"
+          height="800px"
+          src="https://forms.office.com/Pages/ResponsePage.aspx?id=nAWeXCk5zU2i2rEc1Oix1JUw8IzoQg5Hgv69kuQZhD9URVBBTENUWVgyNzJBOE1QVDgyOUo2UklHMi4u&embed=true"
+          frameborder="0"
+          marginwidth="0"
+          marginheight="0"
+          style="border: none; max-width:100%; max-height:100vh"
+          allowfullscreen
+          webkitallowfullscreen
+          mozallowfullscreen
+          msallowfullscreen
+        >
+        </iframe>
+      </b-modal>
 
       <b-modal ref="modalDeletar" hide-footer title="Deletar animal">
         <div class="d-block text-center">
@@ -131,6 +148,9 @@ export default {
     },
     esconderModal() {
       this.$refs.modalDeletar.hide();
+    },
+    adotar() {
+      this.$refs.modalAdotar.show();
     },
     async confirmaDelecao() {
       this.estaAutenticado = this.obtemToken();
