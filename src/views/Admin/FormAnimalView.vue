@@ -81,9 +81,14 @@
         ></b-form-input>
       </b-form-group>
 
-      <b-form-group label="Foto" laber-for="foto">
+      <b-form-group
+        v-if="this.methodSave === 'new'"
+        label="Foto"
+        laber-for="foto"
+      >
         <b-form-file
           id="foto"
+          accept="image/*"
           v-model="foto.$model"
           placeholder="Adicione uma foto do animal."
           required

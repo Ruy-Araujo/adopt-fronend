@@ -23,14 +23,17 @@
         :key="animal.id"
         class="d-flex justify-content-center"
       >
-        <b-card class="w-50 mb-2" :title="animal.nome">
+        <b-card
+          class="w-50 mb-2"
+          :title="animal.nome"
+          :img-src="animal.foto_url"
+        >
           <b-card-text>Espécie: {{ animal.especie }}</b-card-text>
           <b-card-text>Sexo: {{ animal.sexo }}</b-card-text>
           <b-card-text>Idade: {{ animal.idade }}</b-card-text>
           <b-card-text>Raça: {{ animal.raca }}</b-card-text>
           <b-card-text>Observações: {{ animal.observacoes }}</b-card-text>
 
-          <b-button variant="outline-primary" class="mr-2">Ver</b-button>
           <b-button
             v-if="estaAutenticado"
             variant="outline-primary"
@@ -83,8 +86,6 @@
 import ToastMixin from "@/mixins/toastMixin.js";
 import AutenticacaoMixin from "@/mixins/autenticacaoMixin.vue";
 import axios from "axios";
-
-// TODO: Implementar botão de Ver
 
 export default {
   name: "Vitrine",
